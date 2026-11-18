@@ -1,0 +1,83 @@
+T2 - Waves
+Especificação formal do algoritmo do Eco
+
+Programação Distribuída - PUCPR
+Prof. Luiz Lima Jr.
+
+Integrantes do Grupo:
+   1. Gustavo Jansen Butenas
+   2. André Esteves Arantes
+   3. André Luís Scharaiber Alves
+   4. Danillo Gonçalves Camargo da Silva
+   5. Rodrigo Schiavinatto Plassmann
+
+
+Estados = { INICIADOR, OCIOSO, ATIVO, OK }
+   SINI = { INICIADOR, OCIOSO }
+   SFIM = { OK }
+Restrições = { TR, CN, BL, UI }
+
+
+Mensagens
+
+   <R>   requisição, espalhada como no flooding
+   <I>   informação, o id de quem envia concatenado com
+         todas as <I> que ele recebeu
+
+
+Variáveis de cada entidade x
+
+   iniciador   True somente na entidade que inicia a onda
+   entrada     vizinho de quem x recebeu a primeira <R>
+   cont        quantos vizinhos já enviaram <R> ou <I> a x
+   info        id(x) concatenado com as <I> recebidas
+
+
+INICIADOR
+   Espontaneamente
+      iniciador = True
+      info = id(x)
+      cont = 0
+      envia <R> a N(x)
+      estado = ATIVO
+      verifica()
+
+OCIOSO
+   Recebendo <R> de origem
+      iniciador = False
+      entrada = origem
+      info = id(x)
+      cont = 1
+      envia <R> a N(x) - { origem }
+      estado = ATIVO
+      verifica()
+
+ATIVO
+   Recebendo <R> de origem
+      cont = cont + 1
+      verifica()
+
+   Recebendo <I> de origem
+      info = info + I
+      cont = cont + 1
+      verifica()
+
+Procedimento verifica()
+   se cont == |N(x)|:
+      estado = OK
+      se iniciador:
+         imprime info
+      senão:
+         envia <I = info> a { entrada }
+      fimse
+   fimse
+
+
+Observações
+
+- Uma <R> recebida no estado ATIVO também conta como resposta daquele
+  vizinho. Ele já tem outra entrada e por isso nunca vai enviar <I> a x.
+- A entidade de borda tem N(x) = { entrada }. Ela chega em verifica()
+  com cont == |N(x)| logo na primeira <R> e responde <I> na hora.
+- Em cada link passam exatamente duas mensagens, uma em cada sentido
+  (<R> e <R>, ou <R> e <I>). O total é M = 2m.
